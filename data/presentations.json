@@ -1,0 +1,61 @@
+// Простой клиентский скрипт: загрузка списка из data/presentations.json (в реальном сайте — с API)
+(async function() {
+  const listEl = document.getElementById('list');
+  const uploadForm = document.getElementById('upload-form');
+  const fileInput = document.getElementById('file-input');
+
+  // Загрузка списка презентаций из data/presentations.json
+  async function loadPresentations() {
+    try {
+      const resp = await fetch('data/presentations.json');
+      if (!resp.ok) throw new Error('Не удалось загрузить список');
+      const data = await resp.json();
+      renderPresentations(data.presentations || []);
+    } catch (e) {
+      console.error(e);
+      listEl.innerHTML = '<li>Не удалось загрузить список презентаций.</li>';
+    }
+  }
+
+  function renderPresentations(items) {
+    listEl.innerHTML = '';
+    if (!items.length) {
+      listEl.innerHTML = '<li>Список пуст.</li>';
+      return;
+    }
+    items.forEach((p) => {
+      const li = document.createElement('li');
+      li.className = 'presentation-item';
+      const titleSpan = document.createElement('span');
+      titleSpan.textContent = p.title;
+      const tagSpan = document.createElement('span');
+      tagSpan.className = 'badge';
+      tagSpan.textContent = p.tag || 'Презентация';
+      // В реале ссылка на файл
+      const link = document.createElement('a');
+      link.href = '#';
+      link.className = 'presentation-link';
+      link.textContent = p.file || 'Файл';
+      li.appendChild(titleSpan);
+      li.appendChild(link);
+      li.appendChild(tagSpan);
+      listEl.appendChild(li);
+    });
+  }
+
+  uploadForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('Пожалуйста, выберите файл.');
+      return;
+    }
+    // Демонстрационная часть: имитация локального сохранения
+    alert('Файл "' + file.name + '" выбран. В демо-версии файл не загружается на сервер.');
+    // Очистим выбор
+    uploadForm.reset();
+  });
+
+  // Инициализация
+  await loadPresentations();
+})();
